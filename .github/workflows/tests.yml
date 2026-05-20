@@ -29,3 +29,19 @@ jobs:
 
     - name: Run pytest suite
       run: pytest tests/ -v --tb=short
+
+    - name: Run safety benchmarks (jailbreak + FP check)
+      run: |
+        python -c "
+        import sys, pathlib
+        sys.path.insert(0, str(pathlib.Path('.').resolve()))
+        from benchmarks.bench_safety import run_jailbreak_battery, run_false_positive_test
+        total, blocked = run_jailbreak_battery()
+        assert blocked == total, f'JAILBREAK FAILURE: {total-blocked} attacks succeeded'
+        fp_total, fp_blocked = run_false_positive_test()
+        assert fp_blocked == 0, f'FALSE POSITIVE: {fp_blocked}/{fp_total} legitimate actions blocked'
+        from benchmarks.bench_jailbreak import run_jailbreak_suite
+        r = run_jailbreak_suite()
+        assert r.block_rate == 1.0, f'ADVERSARIAL: {r.bypassed} attacks bypassed'
+        print(f'Safety benchmarks: {blocked}/{total} jailbreaks blocked, 0 false positives, {r.total} adversarial blocked')
+        "

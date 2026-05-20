@@ -5,6 +5,8 @@
 [![Tests](https://img.shields.io/badge/tests-48%20passing-brightgreen)](tests/)
 [![Status: Preview](https://img.shields.io/badge/status-v0.1.0--preview-orange)](CLAIMS.md)
 [![Zero deps (core)](https://img.shields.io/badge/core%20deps-stdlib%20only-blue)](requirements.txt)
+[![Jailbreak resistance](https://img.shields.io/badge/jailbreak%20resistance-100%25%20(90%2F90)-brightgreen)](BENCHMARKS.md)
+[![False positives](https://img.shields.io/badge/false%20positive%20rate-0%25-brightgreen)](BENCHMARKS.md)
 
 > **Hard-constraint safety is code, not a system prompt.  
 > Works with any LLM. Proven by tests you can run in seconds.**
@@ -283,5 +285,6 @@ MIT — see [LICENSE](LICENSE).
 
 - [LayerCake](https://github.com/Yoder23/layercake) — domain-modular transformer (the native backend)
 - [ABI](https://github.com/Yoder23/abi) — cross-architecture alignment for existing models
+- [BENCHMARKS.md](BENCHMARKS.md) — MoA vs. AutoGPT, CrewAI, LangChain, NeMo Guardrails (with real numbers)
 - [CLAIMS.md](CLAIMS.md) — what is proven vs aspirational
 - [SKEPTICS.md](SKEPTICS.md) — anticipated objections and honest answers
