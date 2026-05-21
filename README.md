@@ -2,7 +2,7 @@
 
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-48%20passing-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/tests-88%20passing-brightgreen)](tests/)
 [![Status: Preview](https://img.shields.io/badge/status-v0.1.0--preview-orange)](CLAIMS.md)
 [![Zero deps (core)](https://img.shields.io/badge/core%20deps-stdlib%20only-blue)](requirements.txt)
 [![Jailbreak resistance](https://img.shields.io/badge/jailbreak%20resistance-100%25%20(90%2F90)-brightgreen)](BENCHMARKS.md)
@@ -286,10 +286,29 @@ LayerCake results (from companion repo):
 # Core proof (no deps, 0.0s)
 python verify_moa.py
 
-# Full pytest suite (48 tests, no API key needed)
+# Full pytest suite (88 tests, no API key needed)
 pip install pytest
 pytest tests/ -v
 ```
+
+**Coverage:**
+
+| File | Tests | Coverage |
+|---|---|---|
+| `test_safety.py` | 17 | Hard constraints, gate, verifier |
+| `test_ir.py` | 14 | IR types, enums, metadata |
+| `test_agent.py` | 17 | OODA loop, memory, multi-turn |
+| **`test_value_proof.py`** | **40** | **Value proofs: why MoA vs. nothing** |
+
+### Value proof highlights
+
+`test_value_proof.py` answers the sceptic's question — *why does this matter?*
+
+- **`TestForbiddenActionsNeverPass`** — 9 scenarios × 3 forbidden types: 0% pass rate
+- **`TestSafeActionsNeverFalsePositive`** — 10 safe scenarios: 0 false positives
+- **`TestHardCodedNotPrompt`** — 4 prompt-injection payloads: gate unmoved in all cases
+- **`TestUniverseSeparation`** — SIMULATION → FACT: architecturally blocked even at confidence=1.0
+- **`TestSafetyVsNothing`** — side-by-side proof: 100% block rate on dangerous, 100% pass rate on safe
 
 ---
 
