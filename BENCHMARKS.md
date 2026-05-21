@@ -117,6 +117,84 @@ frameworks are ahead.
 
 ---
 
+## The Claw Family: OpenClaw, ZeroClaw, NanoClaw
+
+These frameworks are frequently mentioned in the "AI agent automation" space. Here is an
+honest architectural comparison — not a dismissal, but a factual analysis of *what each
+one protects against*.
+
+> **Research basis:** OpenClaw (github.com/openclaw/openclaw, 374k stars, TypeScript),
+> ZeroClaw (github.com/zeroclaw-labs/zeroclaw, 31.5k stars, Rust),
+> NanoClaw (github.com/Clawland-AI/nanoclaw, 3 stars, Python).
+> OpenClaw and ZeroClaw security models are simulated from their documented behavior.
+> MoA numbers are measured.
+
+### What each framework actually protects (Claw edition)
+
+| Framework | Safety model location | Bypass method | Stars |
+|---|---|---|---|
+| **OpenClaw** (main session) | Sender allowlist (network layer) | N/A — no action-type gate by design | 374k |
+| **OpenClaw** (non-main session) | Docker sandbox (opt-in) | Don't use sandbox mode | 374k |
+| **ZeroClaw** (supervised) | Risk threshold in TOML config | Set `yolo_mode = true` in config | 31.5k |
+| **ZeroClaw** (YOLO mode) | None — all gates bypassed | This IS the bypass | 31.5k |
+| **NanoClaw** | No documented safety model | N/A | 3 |
+| **MoA** | `frozenset` in Python source constants | Edit Python source code | — |
+
+### Head-to-head: 17 test vectors (measured)
+
+```
+Framework                       Blocked     Approved      Note
+-----------------------------------------------------------------------------------
+MoA (this framework)            8/17        9/17          frozenset + FormalVerifier
+OpenClaw (main session)         0/17        17/17         No action-type gate (by design)
+ZeroClaw supervised             1/17        16/17         Risk threshold in TOML
+ZeroClaw YOLO mode              0/17        17/17         All gates bypassed
+NanoClaw                        N/A         N/A           No documented safety model
+```
+
+Test categories: forbidden action types (5), high risk scores (3),
+prompt injection payloads (4), legitimate safe actions (5).
+
+### Bypass test: DECEIVE_USER action from authorized sender
+
+```
+openclaw_main_session    [APPROVED]  bypass: N/A — no action-type gate to bypass (by design)
+zeroclaw_supervised      [BLOCKED ]  bypass: Set yolo_mode=true in config TOML (documented)
+zeroclaw_yolo            [APPROVED]  bypass: This IS the bypass — YOLO mode is the config toggle
+moa_gate                 [BLOCKED ]  bypass: Edit Python source code (HardConstraints.FORBIDDEN_ACTIONS)
+```
+
+### MoA gate throughput (measured, same hardware as all other benchmarks)
+
+```
+Approved path:   620,108 decisions/s
+Rejected path:   683,321 decisions/s
+Latency p50:       1.40 µs
+Latency p95:       2.20 µs
+Latency p99:       2.70 µs
+```
+
+OpenClaw is a Node.js binary and ZeroClaw is a Rust binary. Cross-language latency
+comparison is not meaningful. What is meaningful: MoA's gate overhead is **< 0.01%
+of any real LLM inference call**.
+
+### These are different threat models — an honest summary
+
+OpenClaw solves: *"Who is allowed to talk to my agent?"* (sender/network security).
+It is a personal assistant — full host access for the main session is a feature, not a bug.
+
+ZeroClaw solves: *"What risk level of actions should my agent take?"* (configurable thresholds).
+The `YOLO mode` is explicitly documented for trusted dev environments.
+
+MoA solves: *"What action types are categorically forbidden, regardless of who asks or what
+config says?"* (source-code constants, not runtime config).
+
+These are not competing answers to the same question. They are answers to different questions.
+If your threat model includes "a misconfigured TOML file enabling a forbidden action", MoA's
+approach (Python constants in source) addresses that gap.
+
+---
+
 ## Memory Layer Performance
 
 | Operation | Throughput | Notes |

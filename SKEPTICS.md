@@ -113,3 +113,50 @@ Use LangGraph/AutoGen/CrewAI if you need:
 4. Large community and documentation
 
 MoA is v0.1. Use it where the safety architecture matters more than ecosystem breadth.
+
+---
+
+## "Why compare MoA to OpenClaw? They do completely different things."
+
+**Answer:** Correct — and we say so explicitly.
+
+OpenClaw (374k stars, TypeScript) is a personal messaging assistant. Its security model
+answers: *"Who is allowed to talk to my agent?"* It uses sender allowlists and optional
+Docker sandboxes. There is no action-type gate, and this is by design for a personal
+assistant on a trusted host.
+
+MoA's security model answers a different question: *"What action types are categorically
+forbidden, regardless of who asks?"* The comparison exists because users shopping for an
+"AI agent framework with safety" will encounter both. The comparison is honest about the
+difference — it is not a dismissal of OpenClaw.
+
+## "ZeroClaw has risk scoring too — so how is MoA different?"
+
+**Answer:** Location of the guarantee.
+
+ZeroClaw (31.5k stars, Rust) has configurable risk thresholds in a TOML file. An operator
+can set `yolo_mode = true` and all safety gates are bypassed — this is documented behavior
+for trusted dev environments.
+
+MoA's forbidden action list is a Python `frozenset` in source code (`HardConstraints` in
+`moa/safety.py`). To change it, you must edit and redeploy Python source. This is not
+"more secure" in all contexts — it is a different trust model. The question is: do you
+want your safety boundary to be in config (fast to change by operators) or in code (requires
+a code review + redeploy cycle)?
+
+## "Is MoA just reinventing what ZeroClaw does?"
+
+**Answer:** No. Three differences:
+
+1. **Where the guarantee lives:** ZeroClaw's thresholds are TOML config. MoA's forbidden
+   actions are Python source constants. The bypass paths are different.
+
+2. **What is checked:** ZeroClaw checks aggregate risk scores against thresholds. MoA
+   checks action *types* categorically (frozenset membership check) and then checks scores.
+   Some action types are forbidden at any risk score.
+
+3. **Audit model:** MoA writes every gate decision to an append-only JSONL audit trail.
+   ZeroClaw uses cryptographic tool receipts for audit, which is a different (and
+   complementary) approach — receipts prove *what happened*, the MoA audit trail records
+   *every decision point* including rejected ones.
+

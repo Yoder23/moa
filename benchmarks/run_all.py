@@ -30,6 +30,7 @@ from benchmarks.bench_safety   import run as run_safety, run_jailbreak_battery
 from benchmarks.bench_memory   import run as run_memory
 from benchmarks.bench_agent    import run as run_agent
 from benchmarks.bench_jailbreak import run_jailbreak_suite
+from benchmarks.bench_openclaw_comparison import run_comparison as run_claw_comparison
 
 
 def get_platform_info() -> dict:
@@ -188,6 +189,24 @@ def main():
         "multiturn_p50_ms": round(a.multiturn_p50_ms, 3),
         "multiturn_p99_ms": round(a.multiturn_p99_ms, 3),
     }
+
+    # ─── Claw Family Comparison ───────────────────────────────────────────────
+    print()
+    print("── Claw Family Architecture Comparison ─────────────")
+    t0 = time.perf_counter()
+    claw = run_claw_comparison()
+    elapsed = time.perf_counter() - t0
+    tp = claw["throughput"]
+    h2h = claw["head_to_head"]
+    total = h2h["total"]
+    print(f"  MoA gate (approved):     {fmt_rate(tp['approved_tps'])}")
+    print(f"  MoA gate (rejected):     {fmt_rate(tp['rejected_tps'])}")
+    print(f"  MoA block rate:          {h2h['moa_blocked']}/{total} vectors")
+    print(f"  OpenClaw block rate:     {total - h2h['oc_main_approved']}/{total} (no action-type gate by design)")
+    print(f"  ZeroClaw supervised:     {h2h['zc_supervised_blocked']}/{total} (TOML threshold)")
+    print(f"  ZeroClaw YOLO:           {h2h['zc_yolo_blocked']}/{total} (all gates bypassed)")
+    print(f"  [{elapsed:.1f}s]")
+    results["benchmarks"]["claw_comparison"] = claw
 
     # ─── Pass/Fail Summary ────────────────────────────────────────────────────
     print()
